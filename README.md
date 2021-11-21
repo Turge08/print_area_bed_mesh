@@ -25,7 +25,7 @@ variable_parameter_PRINT_MIN : 0,0
 variable_parameter_PRINT_MAX : 0,0
 </pre>
 
-- Where you normally perform a bed_mesh in your start_print macro, add the following line:
+- Where you normally perform a bed_mesh in your start_print macro, replace it (or add it if you didn't previously have it) with the following line:
 <pre>
 BED_MESH_CALIBRATE PRINT_MIN={params.PRINT_MIN} PRINT_MAX={params.PRINT_MAX}
 </pre>
