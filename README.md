@@ -27,6 +27,7 @@ It's impossible to account for everyone's various config. When first implementin
 [gcode_macro print_start]
 variable_parameter_PRINT_MIN : 0,0
 variable_parameter_PRINT_MAX : 0,0
+gcode:
 </pre>
 
 - Where you normally perform a bed_mesh in your start_print macro, replace it (or add it if you didn't previously have it) with the following line:
