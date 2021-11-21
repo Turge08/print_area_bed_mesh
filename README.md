@@ -15,6 +15,7 @@ Complete credit goes to ChipCE (https://gist.github.com/ChipCE/95fdbd3c2f3a06439
 	- method renamed to bed_mesh_calibrate and is overwriting built-in bed_mesh_calibrate
 	- individual probe count (x and y) is used - if print area X or y is 50% than available area, probe_count for that axis is changed from the default to 3
 	- if "relative_reference_index" is set in bed_mesh, it will be reconfigured to use the middle point on the bed
+	- Works with Klicky Probe on Voron
 
 ## Disclaimer
 
