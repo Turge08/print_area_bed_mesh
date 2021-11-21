@@ -19,7 +19,7 @@ Complete credit goes to ChipCE (https://gist.github.com/ChipCE/95fdbd3c2f3a06439
 
 ## Disclaimer
 
-It's impossible to account for everyone's various config. When first implementing this, be prepared to click the :Emergency Stop" button if it tries to probe off the bed.
+This is currently in development. While it works on my 2 printers, it's impossible to account for everyone's various config. When first implementing this, be prepared to click the "Emergency Stop" button if it tries to probe off the bed.
 
 ## Setup
 
