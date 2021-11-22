@@ -2,7 +2,7 @@
 
 ## Description
 
-- This macro will create a bed_mesh based on the size of your print.
+- This Klipper macro will create a bed mesh based on the size of your print.
 
 ## Credit
 
