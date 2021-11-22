@@ -27,10 +27,10 @@ This is currently in development. While it works on my 2 printers, it's impossib
 
 ## Setup
 
-### Add new macro to Klipper
+### 1. Add new macro to Klipper
 - Through Fluidd or Mainsail, upload the "print_area_bed_mesh.cfg" file to the folder where your printer.cfg file is located and add the following line at the top of your printer.cfg: <pre>[include print_area_bed_mesh.cfg]</pre>
 
-### Modify "start_print" macro
+### 2. Modify "start_print" macro
 - Modify your "print_start" macro in your printer.cfg to include the 2 parameters (PRINT_MIN and PRINT_MAX) <pre>
 [gcode_macro print_start]
 variable_parameter_PRINT_MIN : 0,0
@@ -42,7 +42,7 @@ gcode:
 BED_MESH_CALIBRATE PRINT_MIN={params.PRINT_MIN} PRINT_MAX={params.PRINT_MAX}
 </pre>
 
-### Update your Slicer
+### 3. Update your Slicer
 - Modify your printer start g-code in your slicer to include the PRINT_MIN and PRINT_MAX parameters:
 
 Examples:
