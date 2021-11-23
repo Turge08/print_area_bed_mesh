@@ -27,10 +27,23 @@ This is currently in development. While it works on my 2 printers, it's impossib
 
 ## Setup
 
-### 1. Add new macro to Klipper
-- Through Fluidd or Mainsail, upload the "print_area_bed_mesh.cfg" file to the folder where your printer.cfg file is located and add the following line at the top of your printer.cfg: <pre>[include print_area_bed_mesh.cfg]</pre>
+### 1. Download and install the macro
+SSH into the Pi and run the following commands:<pre>cd ~
+git clone https://github.com/Turge08/print_area_bed_mesh.git
+~/print_area_bed_mesh/install.sh</pre>
 
-### 2. Modify "start_print" macro
+### 2. Include macro in your printer.cfg 
+Through Fluidd/Mainsail, edit printer.cfg file and add the following line at the top of your printer.cfg: <pre>[include print_area_bed_mesh.cfg]</pre>
+
+### 3. Update Moonraker for easy updating
+From Fluidd/Mainsail, edit moonraker.conf (in the same folder as your printer.cfg file) and add:<pre>[update_manager client print_area_bed_mesh]
+type: git_repo
+path: ~/print_area_bed_mesh
+origin: https://github.com/Turge08/print_area_bed_mesh.git
+install_script: install.sh
+is_system_service: False</pre>
+
+### 4. Modify "start_print" macro in your printer.cfg
 - Modify your "print_start" macro in your printer.cfg to include the 2 parameters (PRINT_MIN and PRINT_MAX) <pre>
 [gcode_macro print_start]
 variable_parameter_PRINT_MIN : 0,0
@@ -42,7 +55,7 @@ gcode:
 BED_MESH_CALIBRATE PRINT_MIN={params.PRINT_MIN} PRINT_MAX={params.PRINT_MAX}
 </pre>
 
-### 3. Update your Slicer
+### 5. Update your Slicer
 - Modify your printer start g-code in your slicer to include the PRINT_MIN and PRINT_MAX parameters:
 
 Examples:
