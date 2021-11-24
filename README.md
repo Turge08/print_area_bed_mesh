@@ -1,70 +1,133 @@
-# Print Area Bed Mesh
-
-## Description
-
-- This Klipper macro will create a bed mesh based on the size of your print.
-
-## Credit
-
-Complete credit goes to ChipCE (https://gist.github.com/ChipCE/95fdbd3c2f3a064397f9610f915f7d02) for the idea and sample code. I completely rewrote the macro to be more dynamic and for some added features.
-
-## Features:
-- **Reusable Bed Mesh** - bed mesh will be reused if print area is smaller or equal to the previous one with ability to override
-- **Easy To Add** - Nothing to update in the script since the existing bltouch or probe offsets, existing bed_mesh min/max, probe_count values are used from printer.cfg
-- **Seamless Bed Mesh Calibration** - BED_MESH_CALIBRATE replaced with new script
-- **Separate axis probe counts** - if print area X or y is 50% than available area, probe_count for that axis is changed from the default to 3
-- **Supports Bed Mesh Relative Reference Index** - if "relative_reference_index" is set in bed_mesh, it will be reconfigured to use the middle point on the bed
-- **Klicky Probe Compatible** - Works with Klicky Probe on Voron
-
-## Disclaimer
-
-This is currently in development. While it works on my 2 printers, it's impossible to account for everyone's various config. When first implementing this, be prepared to click the "Emergency Stop" button if it tries to probe off the bed.
-
-## Change Log
-
-- Combined klicky probe version with regular script
-- Added 20mm buffer to bed mesh
-
-## Setup
-
-### 1. Download and install the macro
-SSH into the Pi and run the following commands:<pre>cd ~
-git clone https://github.com/Turge08/print_area_bed_mesh.git
-~/print_area_bed_mesh/install.sh</pre>
-
-### 2. Include macro in your printer.cfg 
-Through Fluidd/Mainsail, edit printer.cfg file and add the following line at the top of your printer.cfg: <pre>[include print_area_bed_mesh.cfg]</pre>
-
-### 3. Update Moonraker for easy updating
-From Fluidd/Mainsail, edit moonraker.conf (in the same folder as your printer.cfg file) and add:<pre>[update_manager client print_area_bed_mesh]
-type: git_repo
-path: ~/print_area_bed_mesh
-origin: https://github.com/Turge08/print_area_bed_mesh.git
-install_script: install.sh
-is_system_service: False</pre>
-
-### 4. Modify "start_print" macro in your printer.cfg
-- Modify your "print_start" macro in your printer.cfg to include the 2 parameters (PRINT_MIN and PRINT_MAX) <pre>
-[gcode_macro print_start]
+[gcode_macro BED_MESH_CALIBRATE]
+# Bed mesh override with automatic probe/bltouch offset calculation
+# Works with Klicky Probe on Voron
+# November 24, 2021
+# Steve Turgeon
+rename_existing: _BED_MESH_CALIBRATE
+; Do not change any of the existing values below.
 variable_parameter_PRINT_MIN : 0,0
 variable_parameter_PRINT_MAX : 0,0
+
+variable_parameter_FORCE_NEW_MESH: False ; Do not change
+
+variable_last_area_start_x: -1 ; Do not change
+variable_last_area_start_y: -1 ; Do not change
+variable_last_area_end_x: -1 ; Do not change
+variable_last_area_end_y: -1 ; Do not change
+
+variable_buffer: 20
+
 gcode:
-</pre>
 
-- Where you normally perform a BED_MESH_CALIBRATE in your start_print macro, replace it (or add it if you didn't previously have it) with the following line:<pre>
-BED_MESH_CALIBRATE PRINT_MIN={params.PRINT_MIN} PRINT_MAX={params.PRINT_MAX}
-</pre>
+    {% if params.FORCE_NEW_MESH == True %}
+        { action_respond_info("Force New Mesh: %s" % (params.FORCE_NEW_MESH)) }
+    {% endif %}
+    
+    {% if printer.toolhead.homed_axes != "xyz" %}
+        G28
+    {% endif %}
+    {% set klicky_available = printer['gcode_macro _Probe_Variables'] != null %}
+    {% if params.PRINT_MIN %}
+        { action_respond_info("print_min: %s" % params.PRINT_MIN) }
+        { action_respond_info("print_max: %s" % params.PRINT_MAX) }
+        
+        {% set blTouchConfig = printer['configfile'].config["bltouch"] %}
+        {% if blTouchConfig %}
+            {% set OffsetX = blTouchConfig.x_offset|default(0)|float %}
+            {% set OffsetY = blTouchConfig.y_offset|default(0)|float %}
+        {% endif %}
+        
+        {% set probeConfig = printer['configfile'].config["probe"] %}
+        {% if probeConfig %}
+            {% set OffsetX = probeConfig.x_offset|default(0)|float %}
+            {% set OffsetY = probeConfig.y_offset|default(0)|float %}
+        {% endif %}
 
-### 5. Update your Slicer
-- Modify your printer start g-code in your slicer to include the PRINT_MIN and PRINT_MAX parameters:
+        {% set print_min_x = params.PRINT_MIN.split(",")[0] %}
+        {% set print_min_y = params.PRINT_MIN.split(",")[1] %}
+        {% set print_max_x = params.PRINT_MAX.split(",")[0] %}
+        {% set print_max_y = params.PRINT_MAX.split(",")[1] %}
 
-Examples:
+        {% if last_area_start_x > 0 %}
+            { action_respond_info("last_bed_mesh: %s,%s %s,%s" % (last_area_start_x, last_area_start_y, last_area_end_x, last_area_end_y)) }
+        {% endif %}
 
+        {% if (params.FORCE_NEW_MESH == True) or (print_min_x|float < last_area_start_x|float) or (print_max_x|float > last_area_end_x|float) or (print_min_y|float < last_area_start_y|float) or (print_max_y|float > last_area_end_y|float)  %}
+            {% if klicky_available %}
+                _CheckProbe action=query
+                Attach_Probe
+            {% endif %}
+            {% if (print_min_x|default(0)|float < print_max_x|default(0)|float) and (print_min_y|default(0)|float < print_max_y|default(0)|float) %}
 
-PrusaSlicer/SuperSlicer:
-<pre>print_start EXTRUDER={first_layer_temperature[initial_extruder] + extruder_temperature_offset[initial_extruder]} BED=[first_layer_bed_temperature] CHAMBER=[chamber_temperature] PRINT_MIN={first_layer_print_min[0]},{first_layer_print_min[1]} PRINT_MAX={first_layer_print_max[0]},{first_layer_print_max[0]}</pre>
+                # Get bed_mesh config (probe count, mesh_min and mesh_max for x and y
+                {% set bedMeshConfig = printer['configfile'].config["bed_mesh"] %}
+                {% set probe_count_x = bedMeshConfig.probe_count.split(",")[0]|int %}
+                {% set probe_count_y = bedMeshConfig.probe_count.split(",")[1]|int %}
+                {% set relative_reference_index = bedMeshConfig.relative_reference_index %}
+                {% set mesh_min_x = bedMeshConfig.mesh_min.split(",")[0]|int %}
+                {% set mesh_min_y = bedMeshConfig.mesh_min.split(",")[1]|int %}
+                {% set mesh_max_x = bedMeshConfig.mesh_max.split(",")[0]|int %}
+                {% set mesh_max_y = bedMeshConfig.mesh_max.split(",")[1]|int %}
 
-Cura (add this to your start gcofe at the end of the start_print command:)
-<pre>PRINT_MIN=%MINX%,%MINY% PRINT_MAX=%MAXX%,%MAXY%</pre>
+                # If print area X is smaller than 50% of the bed size, change to to 3 probe counts for X instead of the default 
+                {% if print_max_x|float - print_min_x|float < (mesh_max_x|float - mesh_min_x|float) * 0.50 %}
+                    {% set probe_count_x = 3 %}
+                {% endif %}
 
-*(Cura slicer plugin) To make the macro to work in Cura slicer, you need to install the post process plugin by frankbags - In cura menu Help -> Show configuration folder. - Copy the python script from the above link in to plugins folder. - Restart Cura - In cura menu Extensions -> Post processing and select Mesh Print Size
+                # If print area Y is smaller than 50% of the bed size, change to to 3 probe counts for Y instead of the default 
+                {% if print_max_y|float - print_min_y|float < (mesh_max_y|float - mesh_min_y|float) * 0.50 %}
+                    {% set probe_count_y = 3 %}
+                {% endif %}
+
+                {% if print_min_x|default(0)|float >=  mesh_min_x %}
+                    {% set mesh_min_x = print_min_x|default(0)|float - buffer %}
+                {% endif %}
+
+                {% if print_min_y|default(0)|float >=  mesh_min_y %}
+                    {% set mesh_min_y = print_min_y|default(0)|float - buffer %}
+                {% endif %}
+
+                {% if print_max_x|default(0)|float <=  mesh_max_x %}
+                    {% set mesh_max_x = print_max_x|default(0)|float + buffer %}
+                {% endif %}
+
+                {% if print_max_y|default(0)|float <=  mesh_max_y %}
+                    {% set mesh_max_y = print_max_y|default(0)|float + buffer %}
+                {% endif %}
+
+                { action_respond_info("mesh_min: %s,%s" % (mesh_min_x, mesh_min_y)) }
+                { action_respond_info("mesh_max: %s,%s" % (mesh_max_x, mesh_max_y)) }
+                { action_respond_info("probe_count: %s,%s" % (probe_count_x,probe_count_y)) }
+
+                ; Set variables so they're available outside of macro
+                SET_GCODE_VARIABLE MACRO=BED_MESH_CALIBRATE VARIABLE=last_area_start_x VALUE={print_min_x|float}
+                SET_GCODE_VARIABLE MACRO=BED_MESH_CALIBRATE VARIABLE=last_area_start_y VALUE={print_min_y|float}
+                SET_GCODE_VARIABLE MACRO=BED_MESH_CALIBRATE VARIABLE=last_area_end_x VALUE={print_max_x|float}
+                SET_GCODE_VARIABLE MACRO=BED_MESH_CALIBRATE VARIABLE=last_area_end_y VALUE={print_max_y|float}
+
+                {% if (relative_reference_index == 0) %}
+                    _BED_MESH_CALIBRATE mesh_min={mesh_min_x|float},{mesh_min_y|float} mesh_max={mesh_max_x|float},{mesh_max_y|float} probe_count={probe_count_x},{probe_count_y}
+                {% else %}
+                    {% set relative_reference_index = ((probe_count_x * probe_count_y)-1)/2|int %}
+                    { action_respond_info("relative_reference_index: %s" % relative_reference_index|int) }
+                    _BED_MESH_CALIBRATE mesh_min={mesh_min_x|float},{mesh_min_y|float} mesh_max={mesh_max_x|float},{mesh_max_y|float} probe_count={probe_count_x},{probe_count_y} relative_reference_index={relative_reference_index|int}
+                {% endif %}
+            {% else %}
+                _BED_MESH_CALIBRATE
+            {% endif %}
+            {% if klicky_available %}
+                Dock_Probe
+            {% endif %}
+        {% else %}
+            { action_respond_info("No need to recreate Bed Mesh since it's same as current mesh or smaller") }
+        {% endif %}
+    {% else %}
+        {% if klicky_available %}
+            _CheckProbe action=query
+            Attach_Probe
+        {% endif %}
+        _BED_MESH_CALIBRATE
+        {% if klicky_available %}
+            Dock_Probe
+        {% endif %}
+    {% endif %}
