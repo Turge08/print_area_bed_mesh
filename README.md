@@ -63,7 +63,7 @@ Examples:
 
 
 PrusaSlicer/SuperSlicer:
-<pre>print_start EXTRUDER={first_layer_temperature[initial_extruder] + extruder_temperature_offset[initial_extruder]} BED=[first_layer_bed_temperature] CHAMBER=[chamber_temperature] PRINT_MIN={first_layer_print_min[0]},{first_layer_print_min[1]} PRINT_MAX={first_layer_print_max[0]},{first_layer_print_max[0]}</pre>
+<pre>print_start EXTRUDER={first_layer_temperature[initial_extruder] + extruder_temperature_offset[initial_extruder]} BED=[first_layer_bed_temperature] CHAMBER=[chamber_temperature] PRINT_MIN={first_layer_print_min[0]},{first_layer_print_min[1]} PRINT_MAX={first_layer_print_max[0]},{first_layer_print_max[1]}</pre>
 
 Cura (add this to your start gcofe at the end of the start_print command:)
 <pre>PRINT_MIN=%MINX%,%MINY% PRINT_MAX=%MAXX%,%MAXY%</pre>
