@@ -38,7 +38,7 @@ git clone https://github.com/Turge08/print_area_bed_mesh.git
 Through Fluidd/Mainsail, edit printer.cfg file and add the following line at the top of your printer.cfg: <pre>[include print_area_bed_mesh.cfg]</pre>
 
 ### 3. Update Moonraker for easy updating
-From Fluidd/Mainsail, edit moonraker.conf (in the same folder as your printer.cfg file) and add:<pre>[update_manager client print_area_bed_mesh]
+From Fluidd/Mainsail, edit moonraker.conf (in the same folder as your printer.cfg file) and add:<pre>[update_manager print_area_bed_mesh]
 type: git_repo
 path: ~/print_area_bed_mesh
 origin: https://github.com/Turge08/print_area_bed_mesh.git</pre>
