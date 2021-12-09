@@ -24,6 +24,8 @@ This is currently in development. While it works on my 2 printers, it's impossib
 
 - Combined klicky probe version with regular script
 - Added 20mm buffer to bed mesh
+- Fixed issue with bed mesh being skipped when current bed mesh is cleared
+- Fixed issue with offset expanding bed mesh area out of bounds
 
 ## Setup
 
