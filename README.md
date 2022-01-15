@@ -46,7 +46,7 @@ is_system_service: False</pre>
 
 NOTE: You must perform step #1 at least once or Moonraker will generate an error.
 
-### 4. Modify "start_print" macro in your printer.cfg
+### 4. Option 1 - Modify "start_print" macro in your printer.cfg
 - Where you normally perform a BED_MESH_CALIBRATE in your start_print macro, replace it (or add it if you didn't previously have it) with the following line:<pre>
 BED_MESH_CALIBRATE PRINT_MIN={params.PRINT_MIN} PRINT_MAX={params.PRINT_MAX}
 </pre>
@@ -55,8 +55,7 @@ BED_MESH_CALIBRATE PRINT_MIN={params.PRINT_MIN} PRINT_MAX={params.PRINT_MAX}
 BED_MESH_CALIBRATE PRINT_MIN={params.PRINT_MIN} PRINT_MAX={params.PRINT_MAX} FORCE_NEW_MESH=True
 </pre>
 
-### 5. Update your Slicer
-- Modify your printer start g-code in your slicer to include the PRINT_MIN and PRINT_MAX parameters:
+- Modify your printer's start g-code in your slicer to include the PRINT_MIN and PRINT_MAX parameters:
 
 Examples:
 
@@ -68,3 +67,11 @@ Examples:
 <pre>PRINT_MIN=%MINX%,%MINY% PRINT_MAX=%MAXX%,%MAXY%</pre>
 
 *(Cura slicer plugin) To make the macro to work in Cura slicer, you need to install the post process plugin by frankbags - In cura menu Help -> Show configuration folder. - Copy the python script from the above link in to plugins folder. - Restart Cura - In cura menu Extensions -> Post processing and select Mesh Print Size
+
+### 5. Option 2 - Modify your printer's start g-code in your slicer:
+
+Examples:
+
+- PrusaSlicer/SuperSlicer:<pre>BED_MESH_CALIBRATE PRINT_MIN={first_layer_print_min[0]},{first_layer_print_min[1]} PRINT_MAX={first_layer_print_max[0]},{first_layer_print_max[1]}</pre>
+
+- Cura<pre>BED_MESH_CALIBRATE PRINT_MIN=%MINX%,%MINY% PRINT_MAX=%MAXX%,%MAXY%</pre>
