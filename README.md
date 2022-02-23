@@ -66,7 +66,7 @@ Examples:
 - Cura (add this to your start gcode at the end of the start_print command:)
 <pre>PRINT_MIN=%MINX%,%MINY% PRINT_MAX=%MAXX%,%MAXY%</pre>
 
-*(Cura slicer plugin) To make the macro to work in Cura slicer, you need to install the post process plugin by frankbags - In cura menu Help -> Show configuration folder. - Copy the python script from the above link in to plugins folder. - Restart Cura - In cura menu Extensions -> Post processing and select Mesh Print Size
+*(Cura slicer plugin) To make the macro to work in Cura slicer, you need to install the post process plugin by frankbags - In cura menu Help -> Show configuration folder. - Copy the python script from the above link in to scripts folder. - Restart Cura - In cura menu Extensions -> Post processing and select Mesh Print Size
 
 ### 5. Option 2 - Modify your printer's start g-code in your slicer:
 
