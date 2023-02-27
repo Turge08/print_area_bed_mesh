@@ -1,5 +1,5 @@
 #!/bin/bash
-KLIPPER_PATH="${HOME}/klipper_config"
+KLIPPER_PATH="${HOME}/printer_data/config"
 SYSTEMDDIR="/etc/systemd/system"
 
 # Step 1:  Verify Klipper has been installed
@@ -17,10 +17,10 @@ check_klipper()
 # Step 2: link extension to Klipper
 link_extension()
 {
-    target=$(find ~/klipper_config -name "print_area_bed_mesh.cfg")
+    target=$(find ~/printer_data/config -name "print_area_bed_mesh.cfg")
     if [[ -z "$target" ]]
     then
-	target="$HOME/klipper_config/print_area_bed_mesh.cfg"
+        target="$HOME/printer_data/config/print_area_bed_mesh.cfg"
     fi
     echo "Linking ${SRCDIR}/print_area_bed_mesh.cfg to $target"
     ln -sf "${SRCDIR}/print_area_bed_mesh.cfg" "$target"
