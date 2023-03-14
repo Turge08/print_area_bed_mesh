@@ -77,3 +77,5 @@ Examples:
 - Cura<pre>BED_MESH_CALIBRATE PRINT_MIN=%MINX%,%MINY% PRINT_MAX=%MAXX%,%MAXY%</pre>
 
 - IdeaMaker<pre>BED_MESH_CALIBRATE PRINT_MIN={print_pos_min_x},{print_pos_min_y} PRINT_MAX={print_pos_max_x},{print_pos_max_y}</pre>
+
+- Bambustudio/OrcaSlicer<pre>BED_MESH_CALIBRATE PRINT_MIN={first_layer_print_min[0]},{first_layer_print_min[1]} PRINT_MAX={first_layer_print_max[0]},{first_layer_print_max[1]}</pre>
