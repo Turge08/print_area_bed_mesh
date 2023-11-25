@@ -79,3 +79,16 @@ Examples:
 - IdeaMaker<pre>BED_MESH_CALIBRATE PRINT_MIN={print_pos_min_x},{print_pos_min_y} PRINT_MAX={print_pos_max_x},{print_pos_max_y}</pre>
 
 - BambuStudio/OrcaSlicer<pre>BED_MESH_CALIBRATE PRINT_MIN={first_layer_print_min[0]},{first_layer_print_min[1]} PRINT_MAX={first_layer_print_max[0]},{first_layer_print_max[1]}</pre>
+
+## Alternate Setup method (Sonic Pad for example)
+
+Note: This method does not allow for auto installing updates as installing git on the Sonic Pad may be problematic
+
+### 1. Install the print_area_bed_mesh.cfg file
+
+Download and add print_area_bed_mesh.cfg file to the same directory as your printer.cfg file in Fluidd/Mainsail 
+
+### 2. Include macro in your printer.cfg 
+Through Fluidd/Mainsail, edit printer.cfg file and add the following line at the top of your printer.cfg: <pre>[include print_area_bed_mesh.cfg]</pre>
+
+### 3. Depending on your setup, follow steps 4 or 5 above.
